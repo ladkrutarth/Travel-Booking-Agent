@@ -1,0 +1,101 @@
+/** Client-side airport lat/lon lookup for offline-ish route maps. */
+
+export type AirportCoord = { iata: string; name: string; city: string; lat: number; lon: number };
+
+const AIRPORTS: AirportCoord[] = [
+  { iata: "JFK", name: "John F. Kennedy International", city: "New York", lat: 40.6413, lon: -73.7781 },
+  { iata: "LGA", name: "LaGuardia", city: "New York", lat: 40.7769, lon: -73.874 },
+  { iata: "EWR", name: "Newark Liberty International", city: "Newark", lat: 40.6895, lon: -74.1745 },
+  { iata: "LAX", name: "Los Angeles International", city: "Los Angeles", lat: 33.9425, lon: -118.4081 },
+  { iata: "SFO", name: "San Francisco International", city: "San Francisco", lat: 37.6213, lon: -122.379 },
+  { iata: "ORD", name: "O'Hare International", city: "Chicago", lat: 41.9742, lon: -87.9073 },
+  { iata: "MDW", name: "Midway International", city: "Chicago", lat: 41.7868, lon: -87.7522 },
+  { iata: "MIA", name: "Miami International", city: "Miami", lat: 25.7959, lon: -80.287 },
+  { iata: "BOS", name: "Logan International", city: "Boston", lat: 42.3656, lon: -71.0096 },
+  { iata: "SEA", name: "Seattle-Tacoma International", city: "Seattle", lat: 47.4502, lon: -122.3088 },
+  { iata: "ATL", name: "Hartsfield-Jackson Atlanta International", city: "Atlanta", lat: 33.6407, lon: -84.4277 },
+  { iata: "DFW", name: "Dallas/Fort Worth International", city: "Dallas", lat: 32.8998, lon: -97.0403 },
+  { iata: "DEN", name: "Denver International", city: "Denver", lat: 39.8561, lon: -104.6737 },
+  { iata: "LAS", name: "Harry Reid International", city: "Las Vegas", lat: 36.084, lon: -115.1537 },
+  { iata: "PHX", name: "Phoenix Sky Harbor International", city: "Phoenix", lat: 33.4373, lon: -112.0078 },
+  { iata: "IAH", name: "George Bush Intercontinental", city: "Houston", lat: 29.9902, lon: -95.3368 },
+  { iata: "CLT", name: "Charlotte Douglas International", city: "Charlotte", lat: 35.214, lon: -80.9431 },
+  { iata: "MSP", name: "Minneapolis–Saint Paul International", city: "Minneapolis", lat: 44.8848, lon: -93.2223 },
+  { iata: "DTW", name: "Detroit Metropolitan Wayne County", city: "Detroit", lat: 42.2162, lon: -83.3554 },
+  { iata: "LHR", name: "Heathrow", city: "London", lat: 51.47, lon: -0.4543 },
+  { iata: "LGW", name: "Gatwick", city: "London", lat: 51.1537, lon: -0.1821 },
+  { iata: "STN", name: "Stansted", city: "London", lat: 51.886, lon: 0.2389 },
+  { iata: "CDG", name: "Charles de Gaulle", city: "Paris", lat: 49.0097, lon: 2.5479 },
+  { iata: "ORY", name: "Orly", city: "Paris", lat: 48.7233, lon: 2.3794 },
+  { iata: "AMS", name: "Amsterdam Schiphol", city: "Amsterdam", lat: 52.3105, lon: 4.7683 },
+  { iata: "FRA", name: "Frankfurt am Main", city: "Frankfurt", lat: 50.0379, lon: 8.5622 },
+  { iata: "MUC", name: "Munich", city: "Munich", lat: 48.3538, lon: 11.7861 },
+  { iata: "FCO", name: "Leonardo da Vinci–Fiumicino", city: "Rome", lat: 41.8003, lon: 12.2389 },
+  { iata: "MXP", name: "Malpensa", city: "Milan", lat: 45.6306, lon: 8.7281 },
+  { iata: "MAD", name: "Adolfo Suárez Madrid–Barajas", city: "Madrid", lat: 40.4983, lon: -3.5676 },
+  { iata: "BCN", name: "Barcelona–El Prat", city: "Barcelona", lat: 41.2974, lon: 2.0833 },
+  { iata: "LIS", name: "Humberto Delgado", city: "Lisbon", lat: 38.7742, lon: -9.1342 },
+  { iata: "DUB", name: "Dublin", city: "Dublin", lat: 53.4264, lon: -6.2499 },
+  { iata: "ZRH", name: "Zurich", city: "Zurich", lat: 47.4582, lon: 8.5555 },
+  { iata: "VIE", name: "Vienna International", city: "Vienna", lat: 48.1103, lon: 16.5697 },
+  { iata: "CPH", name: "Copenhagen", city: "Copenhagen", lat: 55.618, lon: 12.656 },
+  { iata: "ARN", name: "Stockholm Arlanda", city: "Stockholm", lat: 59.6519, lon: 17.9186 },
+  { iata: "OSL", name: "Oslo Gardermoen", city: "Oslo", lat: 60.1939, lon: 11.1004 },
+  { iata: "HEL", name: "Helsinki-Vantaa", city: "Helsinki", lat: 60.3172, lon: 24.9633 },
+  { iata: "IST", name: "Istanbul", city: "Istanbul", lat: 41.2753, lon: 28.7519 },
+  { iata: "DXB", name: "Dubai International", city: "Dubai", lat: 25.2532, lon: 55.3657 },
+  { iata: "DOH", name: "Hamad International", city: "Doha", lat: 25.2731, lon: 51.608 },
+  { iata: "AUH", name: "Zayed International", city: "Abu Dhabi", lat: 24.433, lon: 54.6511 },
+  { iata: "DEL", name: "Indira Gandhi International", city: "Delhi", lat: 28.5562, lon: 77.1 },
+  { iata: "BOM", name: "Chhatrapati Shivaji Maharaj International", city: "Mumbai", lat: 19.0896, lon: 72.8656 },
+  { iata: "BLR", name: "Kempegowda International", city: "Bangalore", lat: 13.1986, lon: 77.7066 },
+  { iata: "SIN", name: "Changi", city: "Singapore", lat: 1.3644, lon: 103.9915 },
+  { iata: "HKG", name: "Hong Kong International", city: "Hong Kong", lat: 22.308, lon: 113.9185 },
+  { iata: "PVG", name: "Shanghai Pudong International", city: "Shanghai", lat: 31.1443, lon: 121.8083 },
+  { iata: "PEK", name: "Beijing Capital International", city: "Beijing", lat: 40.0799, lon: 116.6031 },
+  { iata: "NRT", name: "Narita International", city: "Tokyo", lat: 35.772, lon: 140.3929 },
+  { iata: "HND", name: "Haneda", city: "Tokyo", lat: 35.5494, lon: 139.7798 },
+  { iata: "KIX", name: "Kansai International", city: "Osaka", lat: 34.4347, lon: 135.244 },
+  { iata: "ICN", name: "Incheon International", city: "Seoul", lat: 37.4602, lon: 126.4407 },
+  { iata: "BKK", name: "Suvarnabhumi", city: "Bangkok", lat: 13.69, lon: 100.7501 },
+  { iata: "KUL", name: "Kuala Lumpur International", city: "Kuala Lumpur", lat: 2.7456, lon: 101.7072 },
+  { iata: "SYD", name: "Kingsford Smith", city: "Sydney", lat: -33.9399, lon: 151.1753 },
+  { iata: "MEL", name: "Melbourne", city: "Melbourne", lat: -37.669, lon: 144.841 },
+  { iata: "AKL", name: "Auckland", city: "Auckland", lat: -37.0082, lon: 174.785 },
+  { iata: "YYZ", name: "Toronto Pearson International", city: "Toronto", lat: 43.6777, lon: -79.6248 },
+  { iata: "YVR", name: "Vancouver International", city: "Vancouver", lat: 49.1967, lon: -123.1815 },
+  { iata: "YUL", name: "Montréal–Trudeau International", city: "Montreal", lat: 45.4706, lon: -73.7408 },
+  { iata: "MEX", name: "Benito Juárez International", city: "Mexico City", lat: 19.4363, lon: -99.0721 },
+  { iata: "CUN", name: "Cancún International", city: "Cancún", lat: 21.0365, lon: -86.8771 },
+  { iata: "GRU", name: "São Paulo/Guarulhos", city: "São Paulo", lat: -23.4356, lon: -46.4731 },
+  { iata: "GIG", name: "Rio de Janeiro/Galeão", city: "Rio de Janeiro", lat: -22.809, lon: -43.2506 },
+  { iata: "EZE", name: "Ministro Pistarini International", city: "Buenos Aires", lat: -34.8222, lon: -58.5358 },
+  { iata: "SCL", name: "Arturo Merino Benítez International", city: "Santiago", lat: -33.393, lon: -70.7858 },
+  { iata: "BOG", name: "El Dorado International", city: "Bogotá", lat: 4.7016, lon: -74.1469 },
+  { iata: "LIM", name: "Jorge Chávez International", city: "Lima", lat: -12.0219, lon: -77.1143 },
+  { iata: "JNB", name: "O. R. Tambo International", city: "Johannesburg", lat: -26.1367, lon: 28.2411 },
+  { iata: "CPT", name: "Cape Town International", city: "Cape Town", lat: -33.9649, lon: 18.6017 },
+  { iata: "CAI", name: "Cairo International", city: "Cairo", lat: 30.1219, lon: 31.4056 },
+  { iata: "NBO", name: "Jomo Kenyatta International", city: "Nairobi", lat: -1.3192, lon: 36.9278 },
+  { iata: "ADD", name: "Bole International", city: "Addis Ababa", lat: 8.9779, lon: 38.7993 },
+  { iata: "RUH", name: "King Khalid International", city: "Riyadh", lat: 24.9578, lon: 46.6989 },
+  { iata: "TLV", name: "Ben Gurion", city: "Tel Aviv", lat: 32.0114, lon: 34.8867 },
+];
+
+const BY_IATA = Object.fromEntries(AIRPORTS.map((a) => [a.iata, a]));
+
+export function getAirportCoord(iata: string): AirportCoord | null {
+  return BY_IATA[(iata || "").toUpperCase()] || null;
+}
+
+export function projectEquirectangular(
+  lat: number,
+  lon: number,
+  width: number,
+  height: number,
+  pad = 24,
+): { x: number; y: number } {
+  const x = pad + ((lon + 180) / 360) * (width - pad * 2);
+  const y = pad + ((90 - lat) / 180) * (height - pad * 2);
+  return { x, y };
+}
