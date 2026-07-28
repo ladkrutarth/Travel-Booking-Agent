@@ -63,55 +63,6 @@ flowchart TB
   FastAPI --> Observability[JSON_Logs_RequestIDs]
 ```
 
-### Booking state machine
-
-```mermaid
-stateDiagram-v2
-  [*] --> INTAKE: create_trip
-  INTAKE --> CONSTRAINTS: validate
-  CONSTRAINTS --> SEARCH: search
-  SEARCH --> COMPARE: offers_ready
-  SEARCH --> FAILED: no_offers_or_provider_error
-  COMPARE --> TRAVELERS: select_flight_hotel
-  TRAVELERS --> AWAIT_APPROVAL: travelers_saved
-  AWAIT_APPROVAL --> BOOK: approve
-  AWAIT_APPROVAL --> COMPARE: reject_replan
-  AWAIT_APPROVAL --> EXPIRED: proposal_ttl
-  BOOK --> CONFIRM: flight_and_hotel_ok
-  BOOK --> PARTIAL_FAILURE: hotel_fails_after_flight
-  BOOK --> FAILED: flight_book_fails
-  CONFIRM --> [*]
-  FAILED --> COMPARE: search_again
-  EXPIRED --> COMPARE: search_again
-  PARTIAL_FAILURE --> COMPARE: recovery_search
-```
-
-### Request path for approve and book
-
-```mermaid
-sequenceDiagram
-  participant User
-  participant Next as Nextjs
-  participant API as FastAPI
-  participant Policy as Approval_Budget_Policy
-  participant Agent as TripService_Tools
-  participant DB as Database
-
-  User->>Next: Approve_and_book
-  Next->>API: POST_trips_id_approve_JWT
-  API->>DB: load_trip_check_ownership
-  API->>Policy: hash_expiry_travelers_budget_ack
-  alt policy_fail
-    Policy-->>Next: 409_problem_json
-  else policy_ok
-    API->>Agent: book_flight_then_hotel
-    Agent->>DB: audit_events_bookings
-    API-->>Next: CONFIRM_or_PARTIAL_FAILURE
-    Next-->>User: confirmation_UI
-  end
-```
-
----
 
 ## Stack
 
